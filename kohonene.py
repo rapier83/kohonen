@@ -5,63 +5,94 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 # from mpl_toolkits.mplot3d import Axes3D
 
-# def showData(data):
-#     x = data[..., 0]
-#     y = data[..., 1]
-#     z = data[..., 2]
-#     fig = plt.figure()
-#     ax = Axes3D(fig)
-#     ax.scatter(x, y, z, c=colors)
-#     plt.show()
+class kohonen:
+    def __init__(self):
+        self.timeElapsed = 0
+        self.weight = np.array([])
+        self.initWeight = self.weight.copy()
+        # self.dim = self.initWeight.shape
+        self.alpha = 0.01
 
+    def setWeight(self, n=100, m=2):
+        """ Setting Initial Weights(Matrix), default = 100 * 2"""
+        self.weight = np.random.random((n, m))
+
+    def step(self, inputVector, loop):
+        """step per loop"""
+        assert self.weight.size != 0, "[ - ] weight is not been set. Use \".setWeight(n=100, m=2)\" first."
+        assert inputVector.shape[1] == self.weight.shape[1], "[ - ] Vectors are not same dimension."
+
+        subLoop = inputVector.shape[0] - 1
+        count = 0
+        while count < loop:
+            # /------- get distance ------
+            dist = []
+            for i in range(0, subLoop):
+                k = np.array(((self.weight[..., 0] - inputVector[i, 0]) ** 2) + ((self.weight[..., 1] - inputVector[i,1]) ** 2))
+                dist.append(k)
+
+            # /------- extract minimum vector index ------
+            index = []
+            for i in range(0, subLoop):
+                l = dist[i].argmin()
+                index.append(l)
+
+            for i in range(0, subLoop):
+                self.weight[index[i]] -= self.alpha * (self.weight[index[i]] - inputVector[i])
+
+            # /------- counting loop ------# /
+            count += 1
 
 colors = ["red"] * 50
 colors.extend(["green"] * 50)
 colors.extend(["blue"] * 50)
+markers = ['o']
+markers.extend(['x'])
+markers.extend(['^'])
+
+# fig, ax = plt.subplots()
+# axes = [ax]
+
+# /------- extract minimum vector index ------
 
 
-class kohonen(data):
-    def _init__(self, initState=data):
-        self.timeElapsed = 0
-        self.initState = np.array(initState, dtype=float)
-        self.state = initState.copy()
-        self.alpha = 0.01
-        self.dim = self.initState.shape
-
-    def step(self, dt):
-        """step per loop"""
-
-        self.assignVec = dt
-        temp = 
-        assignSet =
-        self.stateSet = stateSet +
 
 
-    def getDistance(self, p0, p1):
-        p = (po - p1) ** 2
 
 
-# set up initial state
+def overlayData(data):
+    x = data[..., 0]
+    y = data[..., 1]
+    # l = int(data.shape[1] - 1)
+    # for i in range(0,l):
+        # z = data[..., 2]
+        # fig = plt.figure()
+        # ax = fig.
+    plt.scatter(x, y, marker=markers, color=colors)
+
+# /------- initiating ------
 np.random.seed(0)
-inputData = np.random.random((10, 2))
+inputVector = np.random.random((1000, 2))
 
-box = kohonen(inputData)
+print(inputVector[1:5])
 
-initialWeight = np.random.random((100, 2))
-alpha = 0.55
 iteration = 100
-loop = 0
-td = array([[], [], []])
-td[0] = initialWeight.copy()
 
-while loop < iteration:
-    for i in data:
-        td = (td - i) ** 2
-        dist = np.sqrt(td[..., 0] + td[..., 1])
-        td[dist.argmin()] = td[dist.argmin()] + alpha * (i - td[dist.argmin()])
-        # print(loop, dist.argmin(), td[dist.argmin()])
-    loop += 1
+layer = kohonen()
+layer.setWeight(100,2)
 
+print(layer.initWeight[1:5])
+
+layer.step(inputVector, iteration)
+# overlayData(layer.weight)
+
+print(layer.weight[1:5])
+
+plt.show()
+
+
+
+"""
 fig = plt.figure()
 fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
 ax = fig.add_subplot(111, aspect='equal', autoscale_on=False, xlim=(-1, 1), ylim=(-1, 1))
@@ -76,7 +107,7 @@ ax.add_patch(rect)
 
 
 def init():
-    """initialize animation"""
+    # initialize animation
     global box, rect
     particles.set_data([], [])
     rect.set_edgecolor('none')
@@ -84,7 +115,7 @@ def init():
 
 
 def animate(i):
-    """perform animation step"""
+    # perform animation step
     global box, rect, dt, ax, fig
     box.step(dt)
 
@@ -98,5 +129,6 @@ def animate(i):
     return particles, rect
 
 
-anim = animation.FuncAnimation(fig, animate, init_func=init, frames=10, interval=500, blit=True)
+anim = animation.FuncAnimation(fig, animate, init_func=init, frames=loop, interval=1000, blit=True)
 plt.show()
+"""
