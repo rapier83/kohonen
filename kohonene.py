@@ -2,22 +2,26 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import animation
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+# import time
+# from matplotlib import animation
 # from mpl_toolkits.mplot3d import Axes3D
 
 class kohonen:
     def __init__(self):
-        self.timeElapsed = 0
         self.weight = np.array([])
-        self.initWeight = self.weight.copy()
+        self.initWeight = np.array([])
         # self.dim = self.initWeight.shape
         self.alpha = 0.01
 
     def setWeight(self, n=100, m=2):
         """ Setting Initial Weights(Matrix), default = 100 * 2"""
         self.weight = np.random.random((n, m))
+        self.initWeight = self.weight.copy()
 
-    def step(self, inputVector, loop):
+    def step(self, inputVector, loop, storeImg=False):
         """step per loop"""
         assert self.weight.size != 0, "[ - ] weight is not been set. Use \".setWeight(n=100, m=2)\" first."
         assert inputVector.shape[1] == self.weight.shape[1], "[ - ] Vectors are not same dimension."
@@ -42,93 +46,84 @@ class kohonen:
 
             # /------- counting loop ------# /
             count += 1
-
-colors = ["red"] * 50
-colors.extend(["green"] * 50)
-colors.extend(["blue"] * 50)
-markers = ['o']
-markers.extend(['x'])
-markers.extend(['^'])
+            if storeImg == True:
+                overlayData(layer.weight, c='red', a=(count / iteration))
+                plt.savefig(str(count) + "_figure.png")
 
 # fig, ax = plt.subplots()
 # axes = [ax]
 
-# /------- extract minimum vector index ------
 
-
-
-
-
-
-def overlayData(data):
+def overlayData(data, c='red', a=0.5):
     x = data[..., 0]
     y = data[..., 1]
+    z = data[..., 2]
     # l = int(data.shape[1] - 1)
     # for i in range(0,l):
         # z = data[..., 2]
         # fig = plt.figure()
         # ax = fig.
-    plt.scatter(x, y, marker=markers, color=colors)
+ #   plt.scatter(x, y, marker='o', color=c, alpha=a)
+    ax.scatter(x, y, z, c=c, alpha=a, marker='o')
+
+
 
 # /------- initiating ------
 np.random.seed(0)
-inputVector = np.random.random((1000, 2))
-
-print(inputVector[1:5])
-
+dimension = 3
 iteration = 100
+testset = 100
+inputVector = np.random.random((testset, dimension))
+# overlayData(inputVector, 'black', 0.75,storeImg=False)
+# print(inputVector[1:5], inputVector.shape)
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+
 
 layer = kohonen()
-layer.setWeight(100,2)
+layer.setWeight(100,dimension)
+overlayData(layer.initWeight, 'black', 0.3)
+# print(layer.initWeight[1:5], layer.initWeight.shape)
+layer.step(inputVector, iteration, storeImg=True)
+overlayData(layer.weight, 'black', 0.9)
+# print(layer.weight[1:5], layer.weight.shape)
 
-print(layer.initWeight[1:5])
+# /------- draw animation and background ------
+# fig = plt.figure()
+# fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+# ax = fig.add_subplot(111)
 
-layer.step(inputVector, iteration)
-# overlayData(layer.weight)
-
-print(layer.weight[1:5])
-
-plt.show()
-
-
-
-"""
-fig = plt.figure()
-fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
-ax = fig.add_subplot(111, aspect='equal', autoscale_on=False, xlim=(-1, 1), ylim=(-1, 1))
-
-particles, = ax.plot([], [], 'bo', ms=6)
-
-rect = plt.Rectangle(box.bounds[::2],
-                     box.bounds[1] - box.bounds[0],
-                     box.bounds[3] - box.bounds[2],
-                     ec='none', lw=2, fc='none')
-ax.add_patch(rect)
-
+# `particles` holds the location of the particles
+# particles, = ax.plot([], [], 'bo', ms=6)
+#
+# # `rect` is the boarders
+# rect = plt.Rectangle(
+#     (0,0),                      # start point. right low
+#     2,                          # width
+#     2                           # height
+# )
+#
+# ax.add_patch(rect)
 
 def init():
-    # initialize animation
-    global box, rect
-    particles.set_data([], [])
+    global layer, rect
+    particles.set_data([],[])
     rect.set_edgecolor('none')
     return particles, rect
 
-
 def animate(i):
-    # perform animation step
-    global box, rect, dt, ax, fig
-    box.step(dt)
-
-    ms = int(fig.dpi * 2 * box.size * fig.get_figwidth()
-             / np.diff(ax.get_xbound())[0])
-
-    # update pieces of the animation
+    global layer, rect, dt, ax, fig
+    layer.step(inputVector, iteration)
+    # ms = int(fig.dpi * 2 * layer.shape[0] * fig.get_figwidth() / np.diff(ax.get_xbound())[0])
     rect.set_edgecolor('k')
-    particles.set_data(box.state[:, 0], box.state[:, 1])
-    particles.set_markersize(ms)
+    particles.set_data(layer.weight[..., 0],layer.weight[..., 1])
+    # particles.set_makersize(5)
+    print(layer.weight[..., 0], layer.weight[..., 1])
     return particles, rect
 
-
-anim = animation.FuncAnimation(fig, animate, init_func=init, frames=loop, interval=1000, blit=True)
-plt.show()
-"""
+# ani = animation.FuncAnimation(fig, animate, frames=iteration, interval=100, blit=True, init_func=init)
+# ani.save('particle_box.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+print("start encoding.")
+# plt.show()
