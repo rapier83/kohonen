@@ -32,7 +32,7 @@ class kohonen(data):
         """step per loop"""
 
         self.assignVec = dt
-        temp = 
+        temp =
         assignSet =
         self.stateSet = stateSet +
 
